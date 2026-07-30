@@ -1,65 +1,88 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import {
+  getAllArticles,
+  getArticlesByCategory,
+  getFeaturedArticles,
+} from "@/lib/articles";
+import { siteConfig } from "@/config/site";
+import LeadNewsGrid from "@/components/LeadNewsGrid";
+import DailyBrief from "@/components/DailyBrief";
+import SplitDesk from "@/components/SplitDesk";
+import AlabamaBusiness from "@/components/AlabamaBusiness";
+import FinanceLedger from "@/components/FinanceLedger";
+import CommunityReport from "@/components/CommunityReport";
+import BeautyWellnessSection from "@/components/BeautyWellnessSection";
+import LatestNewsList from "@/components/LatestNewsList";
+import type { ArticleListItem } from "@/types/article";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: `${siteConfig.name} | ${siteConfig.tagline}`,
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+};
+
+export default function HomePage() {
+  const all = getAllArticles();
+  const featured = getFeaturedArticles();
+
+  const usedSlugs = new Set<string>();
+  const take = (source: ArticleListItem[], count: number): ArticleListItem[] => {
+    const picked: ArticleListItem[] = [];
+    for (const article of source) {
+      if (picked.length >= count) break;
+      if (usedSlugs.has(article.slug)) continue;
+      picked.push(article);
+      usedSlugs.add(article.slug);
+    }
+    return picked;
+  };
+
+  const leadPool = featured.length > 0 ? [...featured, ...all] : all;
+  const [leadMain] = take(leadPool, 1);
+  const leadSecondary = take(all, 2);
+  const leadLatest = take(all, 6);
+  const dailyBrief = take(all, 5);
+
+  const education = getArticlesByCategory("education");
+  const healthcare = getArticlesByCategory("healthcare");
+  const businessLeaders = getArticlesByCategory("business-leaders");
+  const financeEconomy = getArticlesByCategory("finance-economy");
+  const community = getArticlesByCategory("community");
+  const beautyWellness = getArticlesByCategory("beauty-wellness");
+
+  const latestNews = take(all, 8);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      {leadMain && (
+        <LeadNewsGrid main={leadMain} secondary={leadSecondary} latest={leadLatest} />
+      )}
+
+      {dailyBrief.length > 0 && <DailyBrief articles={dailyBrief} />}
+
+      {education.length >= 3 && healthcare.length >= 3 && (
+        <SplitDesk
+          education={{ main: education[0], secondary: education.slice(1, 3) }}
+          healthcare={{ main: healthcare[0], secondary: healthcare.slice(1, 3) }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      )}
+
+      {businessLeaders.length >= 4 && (
+        <AlabamaBusiness main={businessLeaders[0]} compact={businessLeaders.slice(1, 4)} />
+      )}
+
+      {financeEconomy.length >= 4 && <FinanceLedger articles={financeEconomy.slice(0, 4)} />}
+
+      {community.length > 0 && <CommunityReport articles={community.slice(0, 6)} />}
+
+      {beautyWellness.length >= 4 && (
+        <BeautyWellnessSection
+          main={beautyWellness[0]}
+          secondary={beautyWellness.slice(1, 4)}
+        />
+      )}
+
+      {latestNews.length > 0 && <LatestNewsList articles={latestNews} />}
+    </>
   );
 }
