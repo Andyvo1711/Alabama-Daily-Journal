@@ -2,7 +2,7 @@
 title: "Venus Nails: The Charge That Doesn't Show Up: What Every Nail Salon Owner Should Understand About Taxes"
 slug: "venus-nails-skimming-taxes"
 excerpt: "Charging part of a service on the card and quietly collecting the rest off the books has a name, skimming, and it is one of the surest ways to raise concern with the IRS. Here is why it is riskier than it looks, and what honest owners do instead."
-category: "beauty-wellness"
+category: "finance-economy"
 date: "2026-04-14"
 coverImage: "https://images.unsplash.com/photo-1688149013444-da644d290749?q=80&w=1600&h=900&fit=crop&auto=format"
 featured: false
