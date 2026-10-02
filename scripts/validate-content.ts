@@ -5,6 +5,7 @@ import { categorySlugs } from "../src/config/categories";
 import { isValidIsoDate } from "../src/lib/dates";
 
 const CONTENT_DIR = path.join(process.cwd(), "content", "articles");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
 const REQUIRED_FIELDS = [
   "title",
   "slug",
@@ -50,6 +51,11 @@ function isValidImageUrl(url: string): boolean {
   } catch {
     return false;
   }
+}
+
+// Local images live in /public/images and are referenced as "/images/<file>".
+function isLocalImagePath(url: string): boolean {
+  return /^\/images\/[A-Za-z0-9._-]+\.(png|jpe?g|webp|avif|gif)$/i.test(url);
 }
 
 function countMarkdownSubheadings(content: string): number {
@@ -129,20 +135,30 @@ function validate(): ValidationIssue[] {
     }
 
     if (typeof data.coverImage === "string") {
-      if (!isValidImageUrl(data.coverImage)) {
-        issues.push({
-          file: relativePath,
-          message: `Cover image must be an https Unsplash or Pexels URL: "${data.coverImage}".`,
-        });
-      }
-
-      if (seenImageUrls.has(data.coverImage)) {
-        issues.push({
-          file: relativePath,
-          message: `Duplicate cover image also used in ${seenImageUrls.get(data.coverImage)}.`,
-        });
+      if (isLocalImagePath(data.coverImage)) {
+        // Local image: must exist in /public. Reuse across articles is allowed.
+        const localFile = path.join(PUBLIC_DIR, data.coverImage);
+        if (!fs.existsSync(localFile)) {
+          issues.push({
+            file: relativePath,
+            message: `Local cover image "${data.coverImage}" not found in public folder.`,
+          });
+        }
+      } else if (isValidImageUrl(data.coverImage)) {
+        // Remote Unsplash/Pexels image: must be unique across articles.
+        if (seenImageUrls.has(data.coverImage)) {
+          issues.push({
+            file: relativePath,
+            message: `Duplicate cover image also used in ${seenImageUrls.get(data.coverImage)}.`,
+          });
+        } else {
+          seenImageUrls.set(data.coverImage, relativePath);
+        }
       } else {
-        seenImageUrls.set(data.coverImage, relativePath);
+        issues.push({
+          file: relativePath,
+          message: `Cover image must be an https Unsplash or Pexels URL or a local "/images/..." path: "${data.coverImage}".`,
+        });
       }
     }
 
@@ -177,7 +193,7 @@ const issues = validate();
 if (issues.length > 0) {
   console.error(`\nContent validation failed with ${issues.length} issue(s):\n`);
   for (const issue of issues) {
-    console.error(`  - [${issue.file}] ${issue.message}`);
+    console.error(` - [${issue.file}] ${issue.message}`);
   }
   console.error("");
   process.exit(1);
