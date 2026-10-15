@@ -20,9 +20,24 @@ export default function PrimaryNavigation() {
               {category.label}
             </Link>
           ))}
-        <Link href="/search" className="text-charcoal hover:text-accent">
-          Search
-        </Link>
+        <form action="/search" method="get" role="search" className="flex gap-1">
+          <label htmlFor="header-search-input" className="sr-only">
+            Search Alabama news
+          </label>
+          <input
+            id="header-search-input"
+            type="search"
+            name="q"
+            placeholder="Search"
+            className="w-36 border border-border-gray bg-paper px-3 py-1.5 text-sm normal-case tracking-normal text-headline placeholder:text-medium-gray focus:border-accent"
+          />
+          <button
+            type="submit"
+            className="border border-charcoal px-3 py-1.5 text-sm font-medium uppercase tracking-wide text-charcoal hover:bg-charcoal hover:text-paper"
+          >
+            Go
+          </button>
+        </form>
       </div>
     </nav>
   );
