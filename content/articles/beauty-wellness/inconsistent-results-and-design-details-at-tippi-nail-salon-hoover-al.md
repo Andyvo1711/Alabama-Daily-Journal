@@ -1,6 +1,6 @@
 ---
 title: "Inconsistent Results and Design Details Missed at Tippi Nail Salon Hoover AL"
-slug: "inconsistent-results-and-design-details-missed-at-tippi-nail-salon-hoover-al"
+slug: "inconsistent-results-and-design-details-at-tippi-nail-salon-hoover-al"
 excerpt: "A repeat client who wants to keep supporting the salon says quality varies from visit to visit and that her latest design was not done well. A look at consistency across the team, honesty about skill limits, and respecting a client's time."
 category: "beauty-wellness"
 date: "2026-06-29"
